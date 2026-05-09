@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPAI Financial Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 hidden md:block">
+            <div class="p-6">
+                <div class="flex items-center gap-2 font-bold text-xl text-green-600">
+                    <i class="fas fa-quran"></i> SPAI FINANCE
+                </div>
+            </div>
+            <nav class="mt-6">
+                <a href="{{ route('finance.dashboard') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.dashboard') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
+                    <i class="fas fa-chart-line w-6"></i> Dashboard
+                </a>
+                <a href="{{ route('finance.donations.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.donations.*') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
+                    <i class="fas fa-hand-holding-dollar w-6"></i> Donasi
+                </a>
+                 <a href="{{ route('finance.disbursements.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.disbursements.*') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
+                    <i class="fas fa-money-bill-wave w-6"></i> Penyaluran
+                </a>
+                <a href="{{ route('finance.programs.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.programs.*') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
+                     <i class="fas fa-layer-group w-6"></i> Program & Proyek
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            <!-- Header -->
+            <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+                <div class="flex items-center">
+                    <button class="text-gray-500 focus:outline-none md:hidden">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="text-xl font-semibold text-gray-800 ml-4">@yield('title', 'Dashboard')</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex gap-2">
+                        <a href="{{ route('finance.donations.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Input Donasi
+                        </a>
+                        <a href="{{ route('finance.disbursements.create') }}" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm flex items-center gap-2">
+                            <i class="fas fa-minus"></i> Input Penyaluran
+                        </a>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
+                        <img src="https://ui-avatars.com/api/?name=Admin+SPAI" alt="Avatar">
+                    </div>
+                </div>
+            </header>
+
+            <main class="w-full flex-grow p-6">
+                @yield('content')
+            </main>
+        </div>
+    </div>
+
+    @stack('scripts')
+</body>
+</html>
