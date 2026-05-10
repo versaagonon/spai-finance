@@ -220,7 +220,10 @@ class FinanceController extends Controller
     public function createProject()
     {
         $programs = \App\Models\Program::all();
-        return view('finance.projects.create', compact('programs'));
+        $pillarsJson = \App\Models\AppSetting::get('project_pillars', json_encode(['Pendidikan', 'Kemanusiaan', 'Dakwah', 'Ekonomi', 'Kesehatan', 'Operasional', 'Lainnya']));
+        $pillars = json_decode($pillarsJson, true);
+
+        return view('finance.projects.create', compact('programs', 'pillars'));
     }
 
     public function storeProject(Request $request)

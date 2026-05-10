@@ -40,6 +40,25 @@
                 </form>
             </div>
 
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-columns text-purple-500"></i> Daftar Pilar Proyek
+                </h3>
+                <form action="{{ route('finance.settings.update_pillars') }}" method="POST">
+                    @csrf
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pilar (Pisahkan dengan koma)</label>
+                            <textarea name="pillars" rows="4" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm text-sm" placeholder="Contoh: Pendidikan, Kemanusiaan, Dakwah">{{ implode(', ', $pillars) }}</textarea>
+                            <p class="text-xs text-gray-400 mt-2">Daftar ini akan muncul sebagai pilihan kategori saat membuat proyek baru.</p>
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition shadow-sm font-medium">
+                            Perbarui Daftar Pilar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
                 <h4 class="font-bold text-blue-800 text-sm mb-2">Informasi Hierarki</h4>
                 <ul class="text-xs text-blue-700 space-y-2">

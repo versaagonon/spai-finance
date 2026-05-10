@@ -15,7 +15,10 @@ class SettingController extends Controller
         $programs = Program::all();
         $projects = Project::with('program')->get();
 
-        return view('finance.settings.index', compact('globalAmil', 'programs', 'projects'));
+        $pillarsJson = AppSetting::get('project_pillars', json_encode(['Pendidikan', 'Kemanusiaan', 'Dakwah', 'Ekonomi', 'Kesehatan', 'Operasional', 'Lainnya']));
+        $pillars = json_decode($pillarsJson, true);
+
+        return view('finance.settings.index', compact('globalAmil', 'programs', 'projects', 'pillars'));
     }
 
     public function updateGlobal(Request $request)
@@ -55,5 +58,19 @@ class SettingController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Pengaturan proyek berhasil diperbarui.');
+    }
+
+    public function updatePillars(Request $request)
+    {
+        $request->validate([
+            'pillars' => 'required|string',
+        ]);
+
+        $pillars = array_map('trim', explode(',', $request->pillars));
+        $pillars = array_filter($pillars);
+
+        \App\Models\AppSetting::set('project_pillars', json_encode(array_values($pillars)));
+
+        return redirect()->back()->with('success', 'Daftar pilar berhasil diperbarui.');
     }
 }

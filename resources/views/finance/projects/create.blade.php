@@ -33,13 +33,9 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilar (Kategori)</label>
                     <select name="pilar" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm">
-                        <option value="Pendidikan">Pendidikan</option>
-                        <option value="Kemanusiaan">Kemanusiaan</option>
-                        <option value="Dakwah">Dakwah</option>
-                        <option value="Ekonomi">Ekonomi</option>
-                        <option value="Kesehatan">Kesehatan</option>
-                        <option value="Operasional">Operasional</option>
-                        <option value="Lainnya">Lainnya</option>
+                        @foreach($pillars as $pilar)
+                            <option value="{{ $pilar }}">{{ $pilar }}</option>
+                        @endforeach
                     </select>
                 </div>
 

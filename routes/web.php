@@ -56,6 +56,7 @@ Route::middleware([SpaiAuthMiddleware::class])->group(function () {
     Route::post('/settings/global', [App\Http\Controllers\SettingController::class, 'updateGlobal'])->name('settings.update_global');
     Route::post('/settings/program/{program}', [App\Http\Controllers\SettingController::class, 'updateProgram'])->name('settings.update_program');
     Route::post('/settings/project/{project}', [App\Http\Controllers\SettingController::class, 'updateProject'])->name('settings.update_project');
+    Route::post('/settings/pillars', [App\Http\Controllers\SettingController::class, 'updatePillars'])->name('settings.update_pillars');
 
     // Utilities
     Route::post('/bulk-delete', [FinanceController::class, 'bulkDelete'])->name('bulk_delete');
