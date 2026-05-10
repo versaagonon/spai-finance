@@ -75,12 +75,9 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilar</label>
                     <select id="pilarFilter" class="w-full rounded-lg border-gray-300 focus:ring-red-500 focus:border-red-500 shadow-sm">
                         <option value="">-- Semua Pilar --</option>
-                        <option value="Pendidikan">Pendidikan</option>
-                        <option value="Kemanusiaan">Kemanusiaan</option>
-                        <option value="Dakwah">Dakwah</option>
-                        <option value="Ekonomi">Ekonomi</option>
-                        <option value="Kesehatan">Kesehatan</option>
-                        <option value="Operasional">Operasional</option>
+                        @foreach($pillars as $pilar)
+                            <option value="{{ $pilar }}">{{ $pilar }}</option>
+                        @endforeach
                         <option value="Lainnya">Lainnya</option>
                     </select>
                 </div>

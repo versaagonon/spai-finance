@@ -32,12 +32,33 @@
                 <!-- Pilar -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilar (Kategori)</label>
-                    <select name="pilar" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm">
+                    <select name="pilar" id="pilarSelect" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" onchange="toggleCustomPilar(this.value)">
                         @foreach($pillars as $pilar)
                             <option value="{{ $pilar }}">{{ $pilar }}</option>
                         @endforeach
+                        <option value="Lainnya">-- Lainnya (Input Manual) --</option>
                     </select>
                 </div>
+
+                <div id="customPilarWrapper" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pilar Kustom</label>
+                    <input type="text" name="pilar_custom" id="pilar_custom" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" placeholder="Masukkan nama pilar baru...">
+                </div>
+
+                <script>
+                    function toggleCustomPilar(value) {
+                        const wrapper = document.getElementById('customPilarWrapper');
+                        const customInput = document.getElementById('pilar_custom');
+                        if (value === 'Lainnya') {
+                            wrapper.classList.remove('hidden');
+                            customInput.required = true;
+                            customInput.focus();
+                        } else {
+                            wrapper.classList.add('hidden');
+                            customInput.required = false;
+                        }
+                    }
+                </script>
 
                 <!-- Target Dana -->
                 <div>

@@ -119,7 +119,11 @@ class FinanceController extends Controller
             });
         $programs = \App\Models\Program::all();
         $globalAmil = \App\Models\AppSetting::get('global_amil_percentage', 0);
-        return view('finance.donations.create', compact('projects', 'programs', 'globalAmil'));
+        
+        $pillarsJson = \App\Models\AppSetting::get('project_pillars', json_encode(['Pendidikan', 'Kemanusiaan', 'Dakwah', 'Ekonomi', 'Kesehatan', 'Operasional', 'Lainnya']));
+        $pillars = json_decode($pillarsJson, true);
+
+        return view('finance.donations.create', compact('projects', 'programs', 'globalAmil', 'pillars'));
     }
 
     public function storeDonation(Request $request)
@@ -168,7 +172,11 @@ class FinanceController extends Controller
                 return $project;
             });
         $programs = \App\Models\Program::all();
-        return view('finance.disbursements.create', compact('projects', 'programs'));
+
+        $pillarsJson = \App\Models\AppSetting::get('project_pillars', json_encode(['Pendidikan', 'Kemanusiaan', 'Dakwah', 'Ekonomi', 'Kesehatan', 'Operasional', 'Lainnya']));
+        $pillars = json_decode($pillarsJson, true);
+
+        return view('finance.disbursements.create', compact('projects', 'programs', 'pillars'));
     }
 
     public function storeDisbursement(Request $request)
@@ -231,10 +239,15 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'program_id' => 'required|exists:programs,id',
             'name' => 'required|string|max:255',
-            'pilar' => 'nullable|string', // Optional, maybe derived from Program later
+            'pilar' => 'nullable|string',
+            'pilar_custom' => 'nullable|string|max:255',
             'target_amount' => 'nullable|numeric',
             'description' => 'nullable|string',
         ]);
+
+        if ($validated['pilar'] === 'Lainnya' && !empty($validated['pilar_custom'])) {
+            $validated['pilar'] = $validated['pilar_custom'];
+        }
 
         Project::create($validated);
 
