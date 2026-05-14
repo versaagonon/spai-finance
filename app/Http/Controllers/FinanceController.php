@@ -135,12 +135,66 @@ class FinanceController extends Controller
             'project_id' => 'required|exists:projects,id',
             'amil_percentage' => 'required|numeric',
             'bank_receiver' => 'nullable|string',
+            'bank_receiver_custom' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
 
+        if ($validated['bank_receiver'] === 'Lainnya' && !empty($validated['bank_receiver_custom'])) {
+            $validated['bank_receiver'] = $validated['bank_receiver_custom'];
+        }
+
         Donation::create($validated);
 
-        return redirect()->route('finance.dashboard')->with('success', 'Donation recorded successfully.');
+        return redirect()->route('finance.donations.index')->with('success', 'Donation recorded successfully.');
+    }
+
+    public function editDonation(Donation $donation)
+    {
+        $projects = Project::with('program')
+            ->withSum('donations as total_income', 'amount')
+            ->withSum('donations as total_amil', 'amil_amount')
+            ->withSum('disbursements as total_expense', 'amount')
+            ->get()
+            ->map(function ($project) {
+                $project->total_expense += $project->disbursements()->sum('admin_fee');
+                $project->balance = ($project->total_income - $project->total_amil) - $project->total_expense;
+                return $project;
+            });
+        $programs = \App\Models\Program::all();
+        $globalAmil = \App\Models\AppSetting::get('global_amil_percentage', 0);
+        
+        $pillarsJson = \App\Models\AppSetting::get('project_pillars', json_encode(['Pendidikan', 'Kemanusiaan', 'Dakwah', 'Ekonomi', 'Kesehatan', 'Operasional', 'Lainnya']));
+        $pillars = json_decode($pillarsJson, true);
+
+        return view('finance.donations.edit', compact('donation', 'projects', 'programs', 'globalAmil', 'pillars'));
+    }
+
+    public function updateDonation(Request $request, Donation $donation)
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'donor_name' => 'required|string',
+            'amount' => 'required|numeric',
+            'project_id' => 'required|exists:projects,id',
+            'amil_percentage' => 'required|numeric',
+            'bank_receiver' => 'nullable|string',
+            'bank_receiver_custom' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validated['bank_receiver'] === 'Lainnya' && !empty($validated['bank_receiver_custom'])) {
+            $validated['bank_receiver'] = $validated['bank_receiver_custom'];
+        }
+
+        $donation->update($validated);
+
+        return redirect()->route('finance.donations.index')->with('success', 'Donation updated successfully.');
+    }
+
+    public function destroyDonation(Donation $donation)
+    {
+        $donation->delete();
+        return redirect()->route('finance.donations.index')->with('success', 'Donation deleted successfully.');
     }
 
     // --- Disbursement Methods ---
@@ -188,13 +242,76 @@ class FinanceController extends Controller
             'project_id' => 'required|exists:projects,id',
             'admin_fee' => 'nullable|numeric',
             'bank_sender' => 'nullable|string',
+            'bank_sender_custom' => 'nullable|string',
             'type' => 'required|string|in:project,amil',
             'description' => 'nullable|string',
         ]);
 
+        if ($validated['bank_sender'] === 'Lainnya' && !empty($validated['bank_sender_custom'])) {
+            $validated['bank_sender'] = $validated['bank_sender_custom'];
+        }
+
         Disbursement::create($validated);
 
-        return redirect()->route('finance.dashboard')->with('success', 'Disbursement recorded successfully.');
+        return redirect()->route('finance.disbursements.index')->with('success', 'Disbursement recorded successfully.');
+    }
+
+    public function editDisbursement(Disbursement $disbursement)
+    {
+        $totalAmilGlobal = Donation::sum('amil_amount');
+
+        $projects = Project::with('program')
+            ->withSum('donations as total_income', 'amount')
+            ->withSum('donations as total_amil', 'amil_amount')
+            ->get()
+            ->map(function ($project) use ($totalAmilGlobal) {
+                // Ambil total pengeluaran termasuk biaya admin
+                $project->total_expense = $project->disbursements()->sum('amount') + $project->disbursements()->sum('admin_fee');
+                
+                if (strtoupper($project->name) === 'SPAI') {
+                    // Saldo SPAI = Total Hak Amil Global - Pengeluaran yang pakai proyek SPAI
+                    $project->balance = $totalAmilGlobal - $project->total_expense;
+                } else {
+                    // Saldo Proyek Biasa = Dana Kelola (Bruto - Amil) - Pengeluaran Proyek
+                    $project->balance = ($project->total_income - $project->total_amil) - $project->total_expense;
+                }
+                return $project;
+            });
+        $programs = \App\Models\Program::all();
+
+        $pillarsJson = \App\Models\AppSetting::get('project_pillars', json_encode(['Pendidikan', 'Kemanusiaan', 'Dakwah', 'Ekonomi', 'Kesehatan', 'Operasional', 'Lainnya']));
+        $pillars = json_decode($pillarsJson, true);
+
+        return view('finance.disbursements.edit', compact('disbursement', 'projects', 'programs', 'pillars'));
+    }
+
+    public function updateDisbursement(Request $request, Disbursement $disbursement)
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'recipient' => 'required|string',
+            'amount' => 'required|numeric',
+            'project_id' => 'required|exists:projects,id',
+            'admin_fee' => 'nullable|numeric',
+            'bank_sender' => 'nullable|string',
+            'bank_sender_custom' => 'nullable|string',
+            'type' => 'required|string|in:project,amil',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($validated['bank_sender'] === 'Lainnya' && !empty($validated['bank_sender_custom'])) {
+            $validated['bank_sender'] = $validated['bank_sender_custom'];
+        }
+
+        $disbursement->update($validated);
+
+        return redirect()->route('finance.disbursements.index')->with('success', 'Disbursement updated successfully.');
+    }
+
+    public function destroyDisbursement(Disbursement $disbursement)
+    {
+        $disbursement->delete();
+        return redirect()->route('finance.disbursements.index')->with('success', 'Disbursement deleted successfully.');
     }
 
     // --- Project Ledger ---

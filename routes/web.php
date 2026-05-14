@@ -31,11 +31,17 @@ Route::middleware([SpaiAuthMiddleware::class])->group(function () {
     Route::get('/donations', [FinanceController::class, 'indexDonations'])->name('donations.index');
     Route::get('/donations/create', [FinanceController::class, 'createDonation'])->name('donations.create');
     Route::post('/donations', [FinanceController::class, 'storeDonation'])->name('donations.store');
+    Route::get('/donations/{donation}/edit', [FinanceController::class, 'editDonation'])->name('donations.edit');
+    Route::put('/donations/{donation}', [FinanceController::class, 'updateDonation'])->name('donations.update');
+    Route::delete('/donations/{donation}', [FinanceController::class, 'destroyDonation'])->name('donations.destroy');
 
     // Disbursements
     Route::get('/disbursements', [FinanceController::class, 'indexDisbursements'])->name('disbursements.index');
     Route::get('/disbursements/create', [FinanceController::class, 'createDisbursement'])->name('disbursements.create');
     Route::post('/disbursements', [FinanceController::class, 'storeDisbursement'])->name('disbursements.store');
+    Route::get('/disbursements/{disbursement}/edit', [FinanceController::class, 'editDisbursement'])->name('disbursements.edit');
+    Route::put('/disbursements/{disbursement}', [FinanceController::class, 'updateDisbursement'])->name('disbursements.update');
+    Route::delete('/disbursements/{disbursement}', [FinanceController::class, 'destroyDisbursement'])->name('disbursements.destroy');
 
     // Projects
     Route::get('/projects', [FinanceController::class, 'indexProjects'])->name('projects.index');

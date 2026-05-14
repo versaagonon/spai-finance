@@ -1,53 +1,53 @@
 @extends('layouts.finance')
 
-@section('title', 'New Donation Entry')
+@section('title', 'Edit Donation Entry')
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-6">Input Penerimaan Donasi</h2>
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Edit Penerimaan Donasi</h2>
     
-    <form action="{{ route('finance.donations.store') }}" method="POST">
+    <form action="{{ route('finance.donations.update', $donation) }}" method="POST">
         @csrf
+        @method('PUT')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <!-- Tanggal -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                <input type="date" name="date" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" required>
+                <input type="date" name="date" value="{{ $donation->date->format('Y-m-d') }}" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" required>
             </div>
 
             <!-- Nama Donatur -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Donatur</label>
-                <input type="text" name="donor_name" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" placeholder="Hamba Allah" required>
+                <input type="text" name="donor_name" value="{{ $donation->donor_name }}" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" placeholder="Hamba Allah" required>
             </div>
 
             <!-- Bank Penerima -->
+            @php
+                $standardBanks = ['BSI', 'BCA', 'Mandiri', 'BNI', 'BRI', 'CIMB', 'Permata', 'Muamalat'];
+                $isCustomBank = !in_array($donation->bank_receiver, $standardBanks);
+            @endphp
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Bank Penerima</label>
                 <select name="bank_receiver" id="bank_receiver" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm">
-                    <option value="BSI">BSI</option>
-                    <option value="BCA">BCA</option>
-                    <option value="Mandiri">Mandiri</option>
-                    <option value="BNI">BNI</option>
-                    <option value="BRI">BRI</option>
-                    <option value="CIMB">CIMB</option>
-                    <option value="Permata">Permata</option>
-                    <option value="Muamalat">Muamalat</option>
-                    <option value="Lainnya">Lainnya</option>
+                    @foreach($standardBanks as $bank)
+                        <option value="{{ $bank }}" {{ $donation->bank_receiver === $bank ? 'selected' : '' }}>{{ $bank }}</option>
+                    @endforeach
+                    <option value="Lainnya" {{ $isCustomBank ? 'selected' : '' }}>Lainnya</option>
                 </select>
             </div>
 
             <!-- Bank Penerima Lainnya -->
-            <div id="bank_receiver_custom_group" style="display: none;">
+            <div id="bank_receiver_custom_group" style="display: {{ $isCustomBank ? 'block' : 'none' }};">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Bank Lainnya</label>
-                <input type="text" name="bank_receiver_custom" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" placeholder="Masukkan nama bank">
+                <input type="text" name="bank_receiver_custom" value="{{ $isCustomBank ? $donation->bank_receiver : '' }}" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" placeholder="Masukkan nama bank">
             </div>
 
             <!-- Uang Masuk -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Donasi (Rp)</label>
-                <input type="number" name="amount" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" placeholder="0" required>
+                <input type="number" name="amount" value="{{ $donation->amount }}" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm" placeholder="0" required>
             </div>
 
             <!-- Persentase Hak Amil -->
@@ -58,11 +58,14 @@
                         $options = [0, 5, 12.5, 15];
                         if (!in_array($globalAmil, $options)) {
                             $options[] = $globalAmil;
-                            sort($options);
                         }
+                        if (!in_array($donation->amil_percentage, $options)) {
+                            $options[] = $donation->amil_percentage;
+                        }
+                        sort($options);
                     @endphp
                     @foreach($options as $opt)
-                        <option value="{{ $opt }}" {{ $globalAmil == $opt ? 'selected' : '' }}>{{ $opt }}% {{ $globalAmil == $opt ? '(Global)' : '' }}</option>
+                        <option value="{{ $opt }}" {{ $donation->amil_percentage == $opt ? 'selected' : '' }}>{{ $opt }}%</option>
                     @endforeach
                 </select>
             </div>
@@ -74,7 +77,7 @@
                     <select id="programFilter" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm">
                         <option value="">-- Semua Program --</option>
                         @foreach($programs as $program)
-                            <option value="{{ $program->id }}">{{ $program->name }}</option>
+                            <option value="{{ $program->id }}" {{ optional($donation->project)->program_id == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -85,7 +88,7 @@
                     <select id="pilarFilter" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm">
                         <option value="">-- Semua Pilar --</option>
                         @foreach($pillars as $pilar)
-                            <option value="{{ $pilar }}">{{ $pilar }}</option>
+                            <option value="{{ $pilar }}" {{ optional($donation->project)->pilar == $pilar ? 'selected' : '' }}>{{ $pilar }}</option>
                         @endforeach
                         <option value="Lainnya">Lainnya</option>
                     </select>
@@ -106,7 +109,11 @@
                                 $projectAmil = $project->program->amil_percentage;
                             }
                         @endphp
-                        <option value="{{ $project->id }}" data-program="{{ $project->program_id }}" data-pilar="{{ $project->pilar }}" data-amil="{{ $projectAmil }}">
+                        <option value="{{ $project->id }}" 
+                                data-program="{{ $project->program_id }}" 
+                                data-pilar="{{ $project->pilar }}" 
+                                data-amil="{{ $projectAmil }}"
+                                {{ $donation->project_id == $project->id ? 'selected' : '' }}>
                             {{ $project->program->name ?? 'No Program' }} - {{ $project->name }} ({{ $project->pilar ?? 'General' }})
                         </option>
                     @endforeach
@@ -144,8 +151,9 @@
                             }
                         });
 
-                        if (!currentStillVisible && projectSelect.value !== "") {
-                            projectSelect.value = "";
+                        // Only reset if current project is NOT the one already saved
+                        if (!currentStillVisible && projectSelect.value !== "{{ $donation->project_id }}") {
+                            // projectSelect.value = "";
                         }
 
                         projectCount.textContent = `Menampilkan ${visibleCount} proyek sesuai filter.`;
@@ -156,12 +164,8 @@
                         if (selectedOption && selectedOption.value !== "") {
                             const amilValue = selectedOption.getAttribute('data-amil');
                             
-                            // Debugging
-                            console.log("Selected project amil:", amilValue);
-
                             let optionExists = false;
                             for (let i = 0; i < amilInput.options.length; i++) {
-                                // Gunakan parseFloat untuk perbandingan angka yang akurat
                                 if (parseFloat(amilInput.options[i].value) === parseFloat(amilValue)) {
                                     amilInput.value = amilInput.options[i].value;
                                     optionExists = true;
@@ -170,7 +174,6 @@
                             }
 
                             if (!optionExists) {
-                                // Jika nilai tidak ada di list, buat opsi baru
                                 const newOpt = document.createElement('option');
                                 newOpt.value = amilValue;
                                 newOpt.text = amilValue + "% (Sesuai Pengaturan)";
@@ -195,20 +198,23 @@
                             bankCustomGroup.style.display = 'none';
                         }
                     });
+
+                    // Initial filter
+                    filterProjects();
                 });
             </script>
 
             <!-- Notes -->
              <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
-                <textarea name="notes" rows="3" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm"></textarea>
+                <textarea name="notes" rows="3" class="w-full rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 shadow-sm">{{ $donation->notes }}</textarea>
             </div>
 
         </div>
 
         <div class="mt-8 flex justify-end gap-3">
             <a href="{{ route('finance.donations.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition text-center">Cancel</a>
-            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg">Save Transaction</button>
+            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg">Update Transaction</button>
         </div>
     </form>
 </div>

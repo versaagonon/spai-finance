@@ -21,6 +21,7 @@
                     <th class="p-4 font-medium">Jumlah</th>
                     <th class="p-4 font-medium">Biaya Admin</th>
                     <th class="p-4 font-medium">Total Keluar</th>
+                    <th class="p-4 font-medium">Aksi</th>
                 </tr>
             </thead>
             <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
@@ -32,10 +33,24 @@
                         <td class="p-4 font-bold text-red-600">Rp {{ number_format($disbursement->amount, 2, ',', '.') }}</td>
                         <td class="p-4 text-gray-500">Rp {{ number_format($disbursement->admin_fee, 2, ',', '.') }}</td>
                         <td class="p-4 font-bold text-gray-800">Rp {{ number_format($disbursement->amount + $disbursement->admin_fee, 2, ',', '.') }}</td>
+                        <td class="p-4">
+                            <div class="flex gap-2">
+                                <a href="{{ route('finance.disbursements.edit', $disbursement) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ route('finance.disbursements.destroy', $disbursement) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-gray-400">Belum ada data penyaluran.</td>
+                        <td colspan="7" class="p-8 text-center text-gray-400">Belum ada data penyaluran.</td>
                     </tr>
                 @endforelse
             </tbody>
