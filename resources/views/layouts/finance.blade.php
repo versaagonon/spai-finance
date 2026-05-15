@@ -15,8 +15,8 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-white border-r border-gray-200 hidden md:block">
             <div class="p-6">
-                <div class="flex items-center gap-2 font-bold text-xl text-green-600">
-                    <i class="fas fa-quran"></i> SPAI FINANCE
+                <div class="flex items-center gap-2">
+                    <img src="{{ asset('images/logo.jpeg') }}" alt="SPAI Logo" class="h-50 w-auto rounded-lg">
                 </div>
             </div>
             <nav class="mt-6">
