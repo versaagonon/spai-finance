@@ -19,6 +19,17 @@ class UserSeeder extends Seeder
                 'name' => 'Administrator',
                 'password' => Hash::make('spaifinance123'),
                 'pin' => '112233',
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['username' => 'pengurus'],
+            [
+                'name' => 'Pengurus Yayasan',
+                'password' => Hash::make('pengurus123'),
+                'pin' => '112233',
+                'role' => 'pengurus',
             ]
         );
     }

@@ -81,10 +81,17 @@
                             <td class="p-4 font-bold {{ $net_balance < 0 ? 'text-red-600' : 'text-gray-800' }}">
                                 Rp {{ number_format($net_balance, 0, ',', '.') }}
                             </td>
-                            <td class="p-4 text-center">
+                            <td class="p-4 text-center flex justify-center items-center gap-2">
                                 <a href="{{ route('finance.projects.show', $project->id) }}" class="text-green-600 hover:text-green-800 text-xs font-medium border border-green-200 bg-green-50 px-3 py-1.5 rounded-lg transition">
                                     Lihat Detail
                                 </a>
+                                <form action="{{ route('finance.projects.destroy', $project->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg transition">
+                                        Hapus
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @empty
@@ -144,10 +151,17 @@
                             <td class="p-4 font-bold {{ $net_balance < 0 ? 'text-red-600' : 'text-gray-800' }}">
                                 Rp {{ number_format($net_balance, 0, ',', '.') }}
                             </td>
-                            <td class="p-4 text-center">
+                            <td class="p-4 text-center flex justify-center items-center gap-2">
                                 <a href="{{ route('finance.projects.show', $project->id) }}" class="text-green-600 hover:text-green-800 text-xs font-medium border border-green-200 bg-green-50 px-3 py-1.5 rounded-lg transition">
                                     Lihat Detail
                                 </a>
+                                <form action="{{ route('finance.projects.destroy', $project->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg transition">
+                                        Hapus
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

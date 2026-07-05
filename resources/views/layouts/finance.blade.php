@@ -23,15 +23,19 @@
                 <a href="{{ route('finance.dashboard') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.dashboard') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
                     <i class="fas fa-chart-line w-6"></i> Dashboard
                 </a>
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('finance.donations.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.donations.*') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
                     <i class="fas fa-hand-holding-dollar w-6"></i> Donasi
                 </a>
+                @endif
+                 @if(auth()->user()->role === 'admin')
                  <a href="{{ route('finance.disbursements.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.disbursements.*') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
                     <i class="fas fa-money-bill-wave w-6"></i> Penyaluran
                 </a>
                 <a href="{{ route('finance.programs.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.programs.*') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
                      <i class="fas fa-layer-group w-6"></i> Program & Proyek
                 </a>
+                @endif
                 <div class="px-6 py-4 mt-2">
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Laporan</p>
                     <div class="space-y-1">
@@ -46,9 +50,11 @@
                         </a>
                     </div>
                 </div>
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('finance.settings.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors {{ request()->routeIs('finance.settings.*') ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : '' }}">
                     <i class="fas fa-cog w-6"></i> Pengaturan
                 </a>
+                @endif
             </nav>
         </aside>
 
@@ -64,15 +70,17 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex gap-2">
+                        @if(auth()->user()->role === 'admin')
                         <a href="{{ route('finance.donations.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm flex items-center gap-2">
                             <i class="fas fa-plus"></i> Input Donasi
                         </a>
                         <a href="{{ route('finance.disbursements.create') }}" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm flex items-center gap-2">
                             <i class="fas fa-minus"></i> Input Penyaluran
                         </a>
+                        @endif
                     </div>
                     <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden shadow-sm">
-                        <img src="https://ui-avatars.com/api/?name=Admin+SPAI&background=0D8ABC&color=fff" alt="Avatar">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0D8ABC&color=fff" alt="Avatar">
                     </div>
                     <form action="{{ route('logout') }}" method="POST" class="ml-2">
                         @csrf

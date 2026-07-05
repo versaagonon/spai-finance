@@ -23,10 +23,13 @@ class FinanceController extends Controller
         $disbursementsQuery = Disbursement::query();
 
         if ($startDate && $endDate) {
-            $donationsQuery->whereBetween('date', [$startDate, $endDate]);
-            $disbursementsQuery->whereBetween('date', [$startDate, $endDate]);
+            $donationsQuery->whereDate('date', '>=', [$startDate, $endDate]);
+            $disbursementsQuery->whereDate('date', '>=', [$startDate, $endDate]);
         }
-
+        if ($endDate) {
+                $donationsQuery->whereDate('date', '<=', $endDate);
+                $disbursementsQuery->whereDate('date', '<=', $endDate);
+        }
         // --- Core Statistics Calculation ---
 
         // 1. Total Himpunan (Total Income)
@@ -51,25 +54,36 @@ class FinanceController extends Controller
 
 
         // --- Chart Data: Penyaluran per Pilar ---
-        $penyaluranPerPilar = DB::table('disbursements')
+        $penyaluranQuery = DB::table('disbursements')
             ->join('projects', 'disbursements.project_id', '=', 'projects.id')
             ->select('projects.pilar', DB::raw('SUM(disbursements.amount + disbursements.admin_fee) as total'))
-            ->groupBy('projects.pilar')
-            ->pluck('total', 'projects.pilar');
+            ->groupBy('projects.pilar');
+        
+            if ($startDate) {
+                $penyaluranQuery->whereDate('disbursements.date', '>=', $startDate);
+            }
+            if ($endDate) {
+                $penyaluranQuery->whereDate('disbursements.date', '<+', $endDate);
+            }
+            $penyaluranPerPilar = $penyaluranQuery->pluck('total', 'projects.pilar');
 
 
         // --- Project Table Data (Filtered) ---
         $projects = Project::withSum(['donations as donations_sum_amount' => function($q) use ($startDate, $endDate) {
-            if ($startDate && $endDate) $q->whereBetween('date', [$startDate, $endDate]);
+            if ($startDate) $q->whereDate('date', '>=', $startDate);
+            if ($endDate) $q->whereDate('date', '<=', $endDate);
         }], 'amount')
         ->withSum(['donations as donations_sum_amil_amount' => function($q) use ($startDate, $endDate) {
-            if ($startDate && $endDate) $q->whereBetween('date', [$startDate, $endDate]);
+            if ($startDate) $q->whereDate('date', '>=', $startDate);
+            if ($endDate) $q->whereDate('date', '<=', $endDate);  
         }], 'amil_amount')
         ->withSum(['disbursements as disbursements_sum_amount' => function($q) use ($startDate, $endDate) {
-            if ($startDate && $endDate) $q->whereBetween('date', [$startDate, $endDate]);
+            if ($startDate) $q->whereDate('date', '>=', $startDate);
+            if ($endDate) $q->whereDate('date', '<=', $endDate);
         }], 'amount')
         ->withSum(['disbursements as disbursements_sum_admin_fee' => function($q) use ($startDate, $endDate) {
-            if ($startDate && $endDate) $q->whereBetween('date', [$startDate, $endDate]);
+            if ($startDate) $q->whereDate('date', '>=', $startDate);
+            if ($endDate) $q->whereDate('date', '<=', $endDate);
         }], 'admin_fee')
         ->get()
         ->map(function ($project) use ($totalHakAmil) {
@@ -87,6 +101,12 @@ class FinanceController extends Controller
             }
             return $project;
         });
+
+        if ($startDate || $endDate) {
+            $projects = $projects->filter(function ($project) {
+                return $project->total_income > 0 || $project->total_expense > 0 || $project-> total_amil > 0;
+            })->values();
+        }
 
         return view('dashboard.finance', compact(
             'totalHimpunan',
@@ -403,6 +423,16 @@ class FinanceController extends Controller
         $ledger = $ledger->sortBy('date');
 
         return view('finance.projects.show', compact('project', 'ledger'));
+    }
+
+    public function destroyProject(Project $project)
+    {
+        try {
+            $project->delete();
+            return redirect()->back()->with('success', 'Proyek berhasil di hapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'proyek gagal di hapus pastikan, proyek ada');
+        }
     }
 
     // --- Utilities ---

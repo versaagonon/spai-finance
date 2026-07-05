@@ -14,6 +14,7 @@
         </form>
 
         <div class="flex gap-2">
+            @if(auth()->user()->role === 'admin')
             <form action="{{ route('finance.bulk_delete') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data dalam rentang tanggal ini?');" class="inline">
                 @csrf
                 <input type="hidden" name="start_date" value="{{ request('start_date') }}">
@@ -25,6 +26,7 @@
              <a href="{{ route('finance.export_excel', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition shadow-sm flex items-center gap-2">
                 <i class="fas fa-file-excel"></i> Ekspor Excel
             </a>
+            @endif
         </div>
     </div>
 
@@ -88,7 +90,7 @@
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
             <h3 class="text-lg font-semibold text-gray-800">Daftar Program / Projects ({{ count($projects) }})</h3>
             <div class="relative">
-                <input type="text" placeholder="Cari program..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <input type="text" id="SearchProject" placeholder="Cari program..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
             </div>
         </div>
@@ -101,28 +103,32 @@
                         <th class="p-4 font-medium">Total Uang Keluar</th>
                         <th class="p-4 font-medium">Total Hak Amil</th>
                         <th class="p-4 font-medium">Sisa Saldo</th>
+                        @if(auth()->user()->role === 'admin')
                         <th class="p-4 font-medium text-center">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
-                <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
+                <tbody id="projectTableBody"class="text-sm text-gray-700 divide-y divide-gray-100">
                 @forelse($projects as $project)
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4 font-medium">{{ $project->name }}</td>
+                    <tr class="hover:bg-gray-50 transition project-row">
+                        <td class="p-4 font-medium project-name">{{ $project->name }}</td>
                         <td class="p-4">Rp {{ number_format($project->total_income, 2, ',', '.') }}</td>
                         <td class="p-4">Rp {{ number_format($project->total_expense, 2, ',', '.') }}</td>
                         <td class="p-4">Rp {{ number_format($project->total_amil, 2, ',', '.') }}</td>
                         <td class="p-4 font-bold {{ $project->sisa_saldo < 0 ? 'text-red-500' : 'text-green-600' }}">
                             Rp {{ number_format($project->sisa_saldo, 2, ',', '.') }}
                         </td>
+                        @if(auth()->user()->role === 'admin')
                         <td class="p-4 text-center">
                             <a href="{{ route('finance.projects.show', $project->id) }}" class="text-gray-400 hover:text-green-600 transition">
                                 <i class="fas fa-file-invoice"></i>
                             </a>
                         </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-gray-400">Belum ada data program.</td>
+                        <td colspan="{{ auth()->user()->role === 'admin' ? 6 : 5 }}" class="p-8 text-center text-gray-400">Belum ada data program.</td>
                     </tr>
                 @endforelse
                 </tbody>
@@ -168,6 +174,23 @@
                 }
             }
         }
+    });
+
+    //fitur baru pencarioan table 
+    document.getElementById('SearchProject').addEventListener('keyup', function() { 
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#projectTableBody .project-row');
+
+        rows.forEach(row => {
+            let nameCell = row.querySelector('.project-name');
+            if (nameCell) {
+                let nameText = nameCell.textContent || nameCell.innerText;
+                if (nameText.toLowerCase().indexOf(filter) > -1 ) {
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
     });
 </script>
 @endpush
