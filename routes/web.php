@@ -27,7 +27,7 @@ Route::middleware([SpaiAuthMiddleware::class])->group(function () {
     Route::prefix('finance')->name('finance.')->group(function () {
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('dashboard');
     
-    // Reports (Accessible to both admin and pengurus)
+    // Reports (Accessible to both admin and pengurus) 
     Route::get('/report/receipts', [FinanceController::class, 'reportReceipts'])->name('report.receipts');
     Route::get('/report/disbursements', [FinanceController::class, 'reportDisbursements'])->name('report.disbursements');
     Route::get('/report/amil', [FinanceController::class, 'reportAmil'])->name('report.amil');

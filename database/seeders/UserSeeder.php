@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
             ['username' => 'admin'],
             [
                 'name' => 'Administrator',
-                'password' => Hash::make('spaifinance123'),
+                'password' => Hash::make('Spaifinanace@2026'),
                 'pin' => '112233',
                 'role' => 'admin',
             ]
@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
             ['username' => 'pengurus'],
             [
                 'name' => 'Pengurus Yayasan',
-                'password' => Hash::make('pengurus123'),
+                'password' => Hash::make('P3ngurus@2026'),
                 'pin' => '112233',
                 'role' => 'pengurus',
             ]
