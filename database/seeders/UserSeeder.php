@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     {
         User::updateOrCreate(
             ['username' => 'admin'],
-            [
+            [   
                 'name' => 'Administrator',
                 'password' => Hash::make('Spaifinanace@2026'),
                 'pin' => '112233',

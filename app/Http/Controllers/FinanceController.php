@@ -258,7 +258,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'date' => 'required|date',
             'recipient' => 'required|string',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:1',
             'project_id' => 'required|exists:projects,id',
             'admin_fee' => 'nullable|numeric',
             'bank_sender' => 'nullable|string',
@@ -266,6 +266,24 @@ class FinanceController extends Controller
             'type' => 'required|string|in:project,amil',
             'description' => 'nullable|string',
         ]);
+
+        $project = Project::findOrFail($validated['project_id']);
+        $totalAmilGlobal = Donation::sum('amil_amount');
+        $projectIncome = $project->donations()->sum('amount');
+        $projectAmil = $project->donations()->sum('amil_amount');
+        $projectExpense = $project->disbursements()->sum('amount') + $project->disbursements()->sum('admin_fee');
+
+        if (strtoupper($project->name) === 'SPAI') {
+            $currentBalance = $totalAmilGlobal - $projectExpense;
+        } else {
+            $currentBalance = ($projectIncome - $projectAmil) - $projectExpense;
+        }
+
+        $requestedAmount = $validated['amount'] + ($validated['admin_fee'] ?? 0);
+
+        if ($currentBalance < $requestedAmount) {
+            return back()->withInput()->withErrors(['amount' => 'Saldo proyek tidak mencukupi. Sisa saldo saat ini: Rp ' . number_format($currentBalance, 0, ',', '.')]);
+        }
 
         if ($validated['bank_sender'] === 'Lainnya' && !empty($validated['bank_sender_custom'])) {
             $validated['bank_sender'] = $validated['bank_sender_custom'];
@@ -310,7 +328,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'date' => 'required|date',
             'recipient' => 'required|string',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:1',
             'project_id' => 'required|exists:projects,id',
             'admin_fee' => 'nullable|numeric',
             'bank_sender' => 'nullable|string',
@@ -318,6 +336,26 @@ class FinanceController extends Controller
             'type' => 'required|string|in:project,amil',
             'description' => 'nullable|string',
         ]);
+
+        $project = Project::findOrFail($validated['project_id']);
+        $totalAmilGlobal = Donation::sum('amil_amount');
+        $projectIncome = $project->donations()->sum('amount');
+        $projectAmil = $project->donations()->sum('amil_amount');
+        
+        $projectExpense = $project->disbursements()->where('id', '!=', $disbursement->id)->sum('amount') 
+                        + $project->disbursements()->where('id', '!=', $disbursement->id)->sum('admin_fee');
+
+        if (strtoupper($project->name) === 'SPAI') {
+            $currentBalance = $totalAmilGlobal - $projectExpense;
+        } else {
+            $currentBalance = ($projectIncome - $projectAmil) - $projectExpense;
+        }
+
+        $requestedAmount = $validated['amount'] + ($validated['admin_fee'] ?? 0);
+
+        if ($currentBalance < $requestedAmount) {
+            return back()->withInput()->withErrors(['amount' => 'Saldo proyek tidak mencukupi untuk update ini. Sisa saldo (jika dana pengeluaran ini dikembalikan sementara): Rp ' . number_format($currentBalance, 0, ',', '.')]);
+        }
 
         if ($validated['bank_sender'] === 'Lainnya' && !empty($validated['bank_sender_custom'])) {
             $validated['bank_sender'] = $validated['bank_sender_custom'];
