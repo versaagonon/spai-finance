@@ -99,7 +99,8 @@
                          <option value="{{ $project->id }}" 
                                  data-program="{{ $project->program_id }}" 
                                  data-pilar="{{ $project->pilar }}"
-                                 data-name="{{ trim(strtoupper($project->name)) }}">
+                                 data-name="{{ trim(strtoupper($project->name)) }}"
+                                 data-max-expense="{{ $project->balance }}">
                             {{ $project->program->name ?? 'No Program' }} - {{ $project->name }} (Saldo: Rp {{ number_format($project->balance, 0, ',', '.') }})
                         </option>
                     @endforeach
@@ -191,6 +192,46 @@
                             bankCustomGroup.style.display = 'none';
                         }
                     });
+
+                    // Validation Logic for Balance
+                    const amountInput = document.querySelector('input[name="amount"]');
+                    const adminFeeInput = document.querySelector('input[name="admin_fee"]');
+                    const submitButton = document.querySelector('button[type="submit"]');
+                    const balanceWarning = document.getElementById('balanceWarning');
+                    const warningBalanceAmount = document.getElementById('warningBalanceAmount');
+
+                    function checkBalance() {
+                        const selectedOption = projectSelect.options[projectSelect.selectedIndex];
+                        if (!selectedOption || !selectedOption.value) {
+                            balanceWarning.classList.add('hidden');
+                            submitButton.disabled = false;
+                            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                            return;
+                        }
+
+                        const maxExpense = parseFloat(selectedOption.getAttribute('data-max-expense') || 0);
+                        const amount = parseFloat(amountInput.value || 0);
+                        const adminFee = parseFloat(adminFeeInput.value || 0);
+                        const totalExpense = amount + adminFee;
+
+                        if (maxExpense < totalExpense) {
+                            balanceWarning.classList.remove('hidden');
+                            warningBalanceAmount.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(maxExpense);
+                            submitButton.disabled = true;
+                            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        } else {
+                            balanceWarning.classList.add('hidden');
+                            submitButton.disabled = false;
+                            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    }
+
+                    projectSelect.addEventListener('change', checkBalance);
+                    amountInput.addEventListener('input', checkBalance);
+                    adminFeeInput.addEventListener('input', checkBalance);
+                    
+                    // Initial check
+                    checkBalance();
                 });
             </script>
 
@@ -200,6 +241,10 @@
                 <textarea name="description" rows="3" class="w-full rounded-lg border-gray-300 focus:ring-red-500 focus:border-red-500 shadow-sm"></textarea>
             </div>
 
+        </div>
+
+        <div id="balanceWarning" class="hidden bg-red-50 border-l-4 border-red-500 p-4 mt-8 text-sm text-red-700">
+            <strong><i class="fas fa-exclamation-triangle"></i> Peringatan!</strong> Saldo proyek tidak mencukupi untuk pengeluaran ini. (Maksimal dana yang bisa dikeluarkan: <span id="warningBalanceAmount" class="font-bold">Rp 0</span>)
         </div>
 
         <div class="mt-8 flex justify-end gap-3">
